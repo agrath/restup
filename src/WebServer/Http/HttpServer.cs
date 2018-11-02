@@ -73,7 +73,7 @@ namespace Restup.Webserver.Http
                 }
                 catch (Exception ex)
                 {
-                    _log.Error($"Exception while handling process: {ex.Message}");
+                    _log.Error($"Exception while handling process: {ex.Message} at {ex.StackTrace}");
                 }
                 finally
                 {
