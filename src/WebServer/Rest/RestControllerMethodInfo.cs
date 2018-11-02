@@ -47,6 +47,7 @@ namespace Restup.Webserver.Rest
             _parameterGetters = GetParameterGetters(methodInfo);
             Verb = GetVerb();
 
+
             Type contentParameterType;
             HasContentParameter = TryGetContentParameterType(methodInfo, out contentParameterType);
             ContentParameterType = contentParameterType;
@@ -55,11 +56,26 @@ namespace Restup.Webserver.Rest
         private ParsedUri GetUriFromMethod(MethodInfo methodInfo)
         {
             var uriFormatter = methodInfo.GetCustomAttribute<UriFormatAttribute>();
+
+            string controllerName = RemoveSuffix(methodInfo.DeclaringType.Name, new string[] { "ApiController", "Controller" });
+
             ParsedUri parsedUri;
-            if (!_uriParser.TryParse(uriFormatter.UriFormat, out parsedUri))
+            if (!_uriParser.TryParse($"/{controllerName}/{uriFormatter.UriFormat.RemovePreAndPostSlash()}/", out parsedUri))
                 throw new Exception($"Could not parse uri: {uriFormatter.UriFormat}");
 
             return parsedUri;
+        }
+
+        private static string RemoveSuffix(string value, string[] suffixes)
+        {
+            foreach (var suffix in suffixes)
+            {
+                if (value.EndsWith(suffix, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    value = value.Substring(0, value.Length - suffix.Length);
+                }
+            }
+            return value;
         }
 
         private Type[] GetValidParameterTypes()
@@ -121,7 +137,7 @@ namespace Restup.Webserver.Rest
                 throw new InvalidOperationException("Can't use method parameters with a custom type.");
             }
 
-           return fromUriParams.Select(x => GetParameterGetter(x, _matchUri)).ToArray();
+            return fromUriParams.Select(x => GetParameterGetter(x, _matchUri)).ToArray();
         }
 
         private static ParameterValueGetter GetParameterGetter(ParameterInfo parameterInfo, ParsedUri matchUri)
