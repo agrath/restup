@@ -45,7 +45,7 @@ namespace Restup.Webserver.Rest
                 .OrderByDescending(x => x.MethodInfo.GetParameters().Count())
                 .ToImmutableArray();
 
-            InstanceCreatorCache.Default.CacheCreator(typeof (T));
+            InstanceCreatorCache.Default.CacheCreator(typeof(T));
         }
 
         internal IEnumerable<RestControllerMethodInfo> GetRestMethods<T>(Func<object[]> constructorArgs) where T : class
@@ -121,11 +121,12 @@ namespace Restup.Webserver.Rest
 
             try
             {
-                return await restMethodExecutor.ExecuteMethodAsync(restMethod, req, parsedUri);
+                var task = restMethodExecutor.ExecuteMethodAsync(restMethod, req, parsedUri);
+                return await task;
             }
-            catch
+            catch (Exception ex)
             {
-                return _responseFactory.CreateBadRequest();
+                return _responseFactory.CreateInternalServerErrorResponse(ex);
             }
         }
     }

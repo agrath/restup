@@ -1,7 +1,9 @@
-﻿namespace Restup.Webserver.Models.Schemas
+﻿using Windows.Web.Http;
+
+namespace Restup.Webserver.Models.Schemas
 {
     internal class BadRequestResponse : StatusOnlyResponse
     {
-        internal BadRequestResponse() : base(400) { }
+        internal BadRequestResponse() : base((int)HttpStatusCode.BadRequest) { }
     }
 }
